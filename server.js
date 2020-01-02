@@ -17,7 +17,10 @@ let server = http.createServer((request, response) => {
   } else if (url === '/messages' && method === 'POST' && request.headers['content-type'] === 'application/json') {
     request.on('data', chunk => {
       sendEventToListeners(JSON.parse(chunk));
+      response.writeHead(201);
+      response.end();
     });
+    return;
   }
 
   // response.writeHead(200, {'Content-Type': 'text/html'});
