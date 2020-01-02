@@ -9,6 +9,14 @@ let server = http.createServer((request, response) => {
   const method = request.method.toUpperCase();
   console.log(`${method} ${url}`);
 
+  // CORS support
+  addCorsHeaders(response);
+  if (method === 'OPTIONS') {
+    response.writeHead(204);
+    response.end();
+    return;
+  }
+
   if (url === '/events') {
     if (method === 'GET' && request.headers.accept === 'text/event-stream') {
       registerForEvents(request, response);
@@ -32,6 +40,12 @@ let server = http.createServer((request, response) => {
 server.listen(port, () => {
   console.log(`Server started: http://localhost:${port}`);
 });
+
+function addCorsHeaders(response) {
+  response.setHeader("Access-Control-Allow-Origin", "*");
+  response.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+}
 
 function getRemoteIpAddress(req) {
   // req.headers['x-forwaded-for']
