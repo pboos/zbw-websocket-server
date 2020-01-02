@@ -1,6 +1,7 @@
 'use strict';
 const http = require('http');
 
+const port = process.env.NODE_PORT || 3000;
 const eventsListeners = [];
 
 let server = http.createServer((request, response) => {
@@ -25,8 +26,8 @@ let server = http.createServer((request, response) => {
   response.writeHead(404);
   response.end();
 });
-server.listen(8000, () => {
-  console.log('Server started: http://localhost:8000')
+server.listen(port, () => {
+  console.log(`Server started: http://localhost:${port}`);
 });
 
 function getRemoteIpAddress(req) {
