@@ -68,12 +68,12 @@ function registerForEvents(request, response) {
   });
 }
 
-function sendEventToListeners(data, type = null) {
+function sendEventToListeners(data, eventType = null) {
   let id = new Date().toISOString();
 
   for (let response of eventsListeners) {
     response.write(`id: ${id}\n`);
-    if (type) response.write(`type: ${type}\n`);
+    if (eventType) response.write(`event: ${eventType}\n`);
     response.write(`data: ${JSON.stringify(data)}\n\n`);
   }
 }
