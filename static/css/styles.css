@@ -14,19 +14,6 @@ html, body {
   flex-direction: column;
 }
 
-/* .chat-messages {
-  position: relative;
-  flex: 2;
-  align-self: stretch;
-  background-color: red;
-  overflow:   none;
-}
-
-.chat-messages-inner {
-  position: absolute;
-  bottom: 0;
-} */
-
 #chat-box {
   overflow: none;
   position: relative;
