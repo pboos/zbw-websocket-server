@@ -49,7 +49,7 @@ class Chat {
   }
 
   setUsername(username) {
-    this.username = (username || '').trim();
+    this.username = (username || this.username || '').trim();
     if (this.username.length === 0) {
       // Random username: User1234
       this.username = 'User' + Math.ceil(Math.random() * 9999).toString().padStart(4, '0');
@@ -65,19 +65,28 @@ class Chat {
   }
 
   setupMessageInput() {
-    this.messageInput.onkeyup = (event) => {
-      if (event.code === 'Enter' && this.messageInput.value && this.messageInput.value.trim().length > 0) {
+    const messageForm = document.querySelector('form[name="message"]');
+    messageForm.onsubmit = (e) => {
+      console.log(e);
+      if (this.messageInput.value && this.messageInput.value.trim().length > 0) {
+        this.setUsername(this.usernameInput.value.trim()); // in case we have enter on the username
         this.chatClient.sendMessage(this.username, this.messageInput.value)
         this.messageInput.value = '';
       }
+      return false;
     };
+    // This would work also, but has the problem that it doesn't work on mobile.
+    // this.messageInput.onkeyup = (event) => {
+    //   if (event.code === 'Enter' && this.messageInput.value && this.messageInput.value.trim().length > 0) {
+    //     this.chatClient.sendMessage(this.username, this.messageInput.value)
+    //     this.messageInput.value = '';
+    //   }
+    // };
     this.messageInput.focus();
   }
 
   setupUsernameInput() {
-    this.usernameInput.onblur = (event) => {
-      this.setUsername(this.usernameInput.value.trim());
-    };
+    this.usernameInput.onblur = () => this.setUsername(this.usernameInput.value.trim());
   }
 }
 

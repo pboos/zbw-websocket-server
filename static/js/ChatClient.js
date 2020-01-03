@@ -7,6 +7,9 @@ class ChatServer {
   onConnected(listener) {
     this.onConnectedListener = listener;
   }
+  onWelcome(listener) {
+    this.onWelcomeListener = listener;
+  }
   onMessage(listener) {
     this.onMessageListener = listener;
   }
@@ -33,6 +36,7 @@ class ChatServer {
       this.sendMessage();
     });
 
+    this.eventSource.addEventListener('welcome', e => this.onWelcomeListener && this.onWelcomeListener(JSON.parse(e.data)));
     this.eventSource.addEventListener('join', e => this.onJoinListener && this.onJoinListener(JSON.parse(e.data)));
     this.eventSource.addEventListener('leave', e => this.onLeaveListener && this.onLeaveListener(JSON.parse(e.data)));
     this.eventSource.addEventListener('username.change', e => this.onUsernameChangeListener && this.onUsernameChangeListener(JSON.parse(e.data)));
