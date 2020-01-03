@@ -16,13 +16,13 @@ let server = http.createServer((request, response) => {
   if (url.startsWith('/api')) {
     // CORS support
     addCorsHeaders(request, response);
-    ensureUserCookieSet(request, response);
     if (method === 'OPTIONS') {
       response.writeHead(204);
       response.end();
       return;
     }
 
+    ensureUserCookieSet(request, response);
     if (url === '/api/v1/events') {
       if (method === 'GET' && request.headers.accept === 'text/event-stream') {
         registerForEvents(request, response);
@@ -148,6 +148,7 @@ function registerForEvents(request, response) {
     'Connection': 'keep-alive'
   });
   response.write('\n\n');
+  writeEvent(response, { type: 'welcome', data: { users: users.map(user => user.username) } });
 
   eventsListeners.push(response);
   response.on('close', () => {
