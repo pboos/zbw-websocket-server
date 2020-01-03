@@ -20,12 +20,12 @@ let server = http.createServer((request, response) => {
     return;
   }
 
-  if (url === '/events') {
+  if (url === '/api/v1/events') {
     if (method === 'GET' && request.headers.accept === 'text/event-stream') {
       registerForEvents(request, response);
       return;
     }
-  } else if (url === '/messages' && method === 'POST' && request.headers['content-type'] === 'application/json') {
+  } else if (url === '/api/v1/messages' && method === 'POST' && request.headers['content-type'] === 'application/json') {
     request.on('data', chunk => {
       const message = JSON.parse(chunk);
       updateActiveUser(request, message.username);
