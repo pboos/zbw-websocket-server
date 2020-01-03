@@ -1,5 +1,6 @@
 'use strict';
 const http = require('http');
+const fs = require('fs');
 
 const port = process.env.NODE_PORT || 3000;
 const cookieName = 't'; // t for token
@@ -11,35 +12,65 @@ let server = http.createServer((request, response) => {
   const method = request.method.toUpperCase();
   console.log(`${method} ${url}`);
 
-  // CORS support
-  addCorsHeaders(request, response);
-  ensureUserCookieSet(request, response);
-  if (method === 'OPTIONS') {
-    response.writeHead(204);
-    response.end();
-    return;
-  }
 
-  if (url === '/api/v1/events') {
-    if (method === 'GET' && request.headers.accept === 'text/event-stream') {
-      registerForEvents(request, response);
+  if (url.startsWith('/api')) {
+    // CORS support
+    addCorsHeaders(request, response);
+    ensureUserCookieSet(request, response);
+    if (method === 'OPTIONS') {
+      response.writeHead(204);
+      response.end();
       return;
     }
-  } else if (url === '/api/v1/messages' && method === 'POST' && request.headers['content-type'] === 'application/json') {
-    request.on('data', chunk => {
-      const message = JSON.parse(chunk);
-      updateActiveUser(request, message.username);
-      if (message.message && message.message.trim().length > 0) {
-        sendEventToListeners(message);
-      }
-      response.writeHead(201);
-      response.end();
-    });
-    return;
-  }
 
-  // response.writeHead(200, {'Content-Type': 'text/html'});
-  // response.write(fs.readFileSync(__dirname + '/index.html'));
+    if (url === '/api/v1/events') {
+      if (method === 'GET' && request.headers.accept === 'text/event-stream') {
+        registerForEvents(request, response);
+        return;
+      }
+    } else if (url === '/api/v1/messages' && method === 'POST' && request.headers['content-type'] === 'application/json') {
+      request.on('data', chunk => {
+        const message = JSON.parse(chunk);
+        updateActiveUser(request, message.username);
+        if (message.message && message.message.trim().length > 0) {
+          sendEventToListeners(message);
+        }
+        response.writeHead(201);
+        response.end();
+      });
+      return;
+    }
+  } else {
+    let file = url.endsWith('/') ? url + 'index.html' : url;
+    let contentType;
+    switch (file.substring(file.lastIndexOf('.'))) {
+      case '.html': contentType = 'text/html; charset=UTF-8'; break;
+      case '.js': contentType = 'application/javascript; charset=UTF-8'; break;
+      case '.css': contentType = 'text/css'; break;
+      case '.png': contentType = 'image/png'; break;
+      case '.jpg': contentType = 'image/jpeg'; break;
+      case '.gif': contentType = 'image/gif'; break;
+      case '.ico': contentType = 'image/x-icon'; break;
+      case '.ogg': contentType = 'audio/ogg'; break;
+      case '.ebm': contentType = 'video/webm'; break;
+    }
+
+    if (url.indexOf('..') > -1 || !contentType) {
+      response.writeHead(403);
+      response.end();
+      return;
+    }
+
+    try {
+      const fileContent = fs.readFileSync(__dirname + '/static' + file);
+      response.writeHead(200, { 'Content-Type': contentType });
+      response.end(fileContent);
+    } catch {
+      response.writeHead(404);
+      response.end();
+      return;
+    }
+  }
 
   response.writeHead(404);
   response.end();
@@ -51,6 +82,8 @@ server.listen(port, () => {
 ///////////////////////////////////////////
 
 function addCorsHeaders(request, response) {
+  if (!request.headers['origin']) return; // no need if no origin (same site)
+
   // response.setHeader("Access-Control-Allow-Origin", "*");
   response.setHeader("Access-Control-Allow-Origin", request.headers['origin']);
   response.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
