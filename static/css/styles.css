@@ -39,13 +39,21 @@ html, body {
 #chat-messages {
   overflow: auto;
   position: absolute;
+  top: 0;
   bottom: 0;
+  left: 0;
+  right: 0;
   max-height: 100%;
   padding: 20px;
 }
 
-#chat-messages .chat-message {
+#chat-messages > div {
   margin-top: 20px;
+}
+#chat-messages .chat-join,
+#chat-messages .chat-leave,
+#chat-messages .chat-username-change {
+  font-style: italic;
 }
 
 #chat-message {

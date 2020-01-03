@@ -11,23 +11,19 @@ class Chat {
 
     this.chatClient = new ChatClient();
     this.chatClient.onMessage(message => {
-      const messages = document.getElementById('chat-messages');
-      const messageElement = document.createElement('div');
-      messageElement.innerHTML = `<b>${message.username}</b>: ${message.message}`;
-      messageElement.classList.add('chat-message');
-      messages.appendChild(messageElement);
-
-      // TODO only update if user didn't scroll
-      this.updateScroll();
+      this.appendMessage(`<b>${message.username}</b>: ${message.message}`);
     });
     this.chatClient.onJoin(data => {
-      console.log('Join', data);
+      this.appendMessage(`<b>${data.username}</b> joined`, 'chat-join');
     });
     this.chatClient.onLeave(data => {
-      console.log('Leave', data);
+      this.appendMessage(`<b>${data.username}</b> left`, 'chat-leave');
     });
     this.chatClient.onUsernameChange(data => {
-      console.log('Username change', data);
+      this.appendMessage(`<b>${data.old}</b> is now called <b>${data.new}</b>`, 'chat-username-change');
+    });
+    this.chatClient.onWelcome(data => {
+      this.appendMessage(`<b>Welcome!</b><br/><i>Users in chat: ${data.users.join(', ')}</i>`, 'chat-welcome');
     });
     this.chatClient.onConnected(() => this.chatClient.sendMessage(this.username, '') /* join message */);
     this.chatClient.start();
@@ -35,6 +31,17 @@ class Chat {
     this.updateScroll();
     this.setupMessageInput();
     this.setupUsernameInput();
+  }
+
+  appendMessage(html, className='chat-message') {
+    const messages = document.getElementById('chat-messages');
+    const messageElement = document.createElement('div');
+    messageElement.innerHTML = html;
+    messageElement.classList.add(className);
+    messages.appendChild(messageElement);
+
+    // TODO only update if user didn't scroll
+    this.updateScroll();
   }
 
   loadUsername() {
